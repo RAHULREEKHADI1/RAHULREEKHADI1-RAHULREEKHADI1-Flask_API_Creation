@@ -1,4 +1,4 @@
-from flask import Blueprint,request,jsonify,render_template
+from flask import Blueprint,request,jsonify
 from app import db
 from models import User
 
@@ -8,7 +8,7 @@ api = Blueprint("api",__name__)
 
 @api.route("/")
 def home_page():
-    return render_template("Home.html")
+    return "this is my home page"
 
 
 @api.route("/users",methods=["POST"])
