@@ -1,4 +1,4 @@
-from flask import Flask,jsonify
+from flask import Flask, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.exceptions import NotFound
 
@@ -10,19 +10,19 @@ def create_app(test_config=None):
     app.config.from_mapping(
         SQLALCHEMY_DATABASE_URI="sqlite:///app.db",
         SQLALCHEMY_TRACK_MODIFICATIONS=False,
-        DEBUG=False  
+        DEBUG=False   
     )
-
-    @app.errorhandler(404)
-    def handle_404(e):
-        return jsonify({"error": "Resource not found"}), 404
 
     if test_config:
         app.config.update(test_config)
 
     db.init_app(app)
 
-    from routes.user_routes import api
+    @app.errorhandler(404)
+    def handle_404(e):
+        return jsonify({"error": "Resource not found"}), 404
+
+    from .routes.user_routes import api
     app.register_blueprint(api)
 
     with app.app_context():

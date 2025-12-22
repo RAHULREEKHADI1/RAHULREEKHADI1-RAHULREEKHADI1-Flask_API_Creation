@@ -9,7 +9,7 @@ api = Blueprint("api",__name__)
 
 @api.route("/")
 def home_page():
-    return render_template("Home.html")
+    return "This is my home page"
 
 
 @api.route("/users",methods=["POST"])
