@@ -1,16 +1,20 @@
 from flask import Flask, jsonify
 from flask_sqlalchemy import SQLAlchemy
-from werkzeug.exceptions import NotFound
+from werkzeug.exceptions import HTTPException
+from dotenv import load_dotenv
 
 db = SQLAlchemy()
+load_dotenv()
 
 def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
 
+    import os
     app.config.from_mapping(
-        SQLALCHEMY_DATABASE_URI="sqlite:///app.db",
+        SECRET_KEY=os.getenv("SECRET_KEY"),
+        SQLALCHEMY_DATABASE_URI=os.getenv("DATABASE_URL"),
         SQLALCHEMY_TRACK_MODIFICATIONS=False,
-        DEBUG=False   
+        EBUG=False
     )
 
     if test_config:
@@ -18,9 +22,12 @@ def create_app(test_config=None):
 
     db.init_app(app)
 
-    @app.errorhandler(404)
-    def handle_404(e):
-        return jsonify({"error": "Resource not found"}), 404
+    @app.errorhandler(HTTPException)
+    def handle_http_exception(e):
+        return jsonify({
+            "error": e.description
+        }), e.code
+
 
     from .routes.user_routes import api
     app.register_blueprint(api)
