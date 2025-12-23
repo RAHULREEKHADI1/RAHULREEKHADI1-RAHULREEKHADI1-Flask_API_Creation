@@ -2,7 +2,7 @@ from app import db
 from app.models.user import User
 from sqlalchemy.exc import IntegrityError
 from werkzeug.exceptions import BadRequest, Conflict, NotFound, Unauthorized
-from flask_jwt_extended import create_access_token
+from flask_jwt_extended import create_access_token,create_refresh_token
 
 
 def signup(data):
@@ -23,7 +23,7 @@ def signup(data):
 
     return {
         "user": user.to_dict(),
-        "access_token": access_token
+        "access_token": access_token,
     }
     
 
@@ -37,10 +37,12 @@ def login(data):
         raise Unauthorized("Invalid email or password")
 
     access_token = create_access_token(identity=str(user.id))
+    refresh_token = create_refresh_token(identity=str(user.id))
 
     return {
         "user": user.to_dict(),
-        "access_token": access_token
+        "access_token": access_token,
+        "refresh_token":refresh_token
     }
 
 
@@ -73,3 +75,7 @@ def delete_user(user_id):
     user = get_user_by_id(user_id)
     db.session.delete(user)
     db.session.commit()
+
+
+def refresh_access_token(user_id):
+    return create_access_token(identity=str(user_id))
