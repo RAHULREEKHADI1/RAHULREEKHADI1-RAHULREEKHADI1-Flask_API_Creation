@@ -3,14 +3,32 @@ from app.models.user import User
 from sqlalchemy.exc import IntegrityError
 from werkzeug.exceptions import BadRequest, Conflict, NotFound, Unauthorized
 from flask_jwt_extended import create_access_token,create_refresh_token
+from email_validator import validate_email, EmailNotValidError
+import re
 
 
 def signup(data):
-    if not data.get("name") or not data.get("email") or not data.get("password"):
-        raise BadRequest("Name, Password and email are required")
+    name = data.get("name", "").strip()
+    email = data.get("email", "").strip()
+    password = data.get("password", "").strip()
 
-    user = User(name=data["name"], email=data["email"])
-    user.set_password(data["password"])
+    if not name or not email or not password:
+        raise BadRequest("Name, Password and email are required")
+    
+    if not re.fullmatch(r"[A-Za-z ]+", name):
+        raise BadRequest("Name can contain only alphabets and spaces")
+    
+    if len(password) < 8:
+        raise BadRequest("Password must be at least 8 characters long")
+    
+    try:
+        email = validate_email(email).email
+    except EmailNotValidError:
+        raise BadRequest("Invalid email format")
+
+    user = User(name=name, email=email)
+    user.set_password(password)
+
     db.session.add(user)
     print("what is the behaviour")
     try:
@@ -28,8 +46,16 @@ def signup(data):
     
 
 def login(data):
-    if not data.get("email") or not data.get("password"):
+    email = data.get("email","").strip()
+    password = data.get("password","").strip()
+
+    if not email or not password:
         raise BadRequest("Email and password are required")
+    
+    try:
+        email = validate_email(email).email
+    except EmailNotValidError:
+        raise BadRequest("Invalid email format")
 
     user = User.query.filter_by(email=data["email"]).first()
 
