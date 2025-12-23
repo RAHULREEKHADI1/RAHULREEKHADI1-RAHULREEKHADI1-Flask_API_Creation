@@ -2,25 +2,30 @@ from flask import Flask, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.exceptions import HTTPException
 from dotenv import load_dotenv
+from flask_jwt_extended import JWTManager
 
 db = SQLAlchemy()
 load_dotenv()
 
+
 def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
+    
 
     import os
     app.config.from_mapping(
-        SECRET_KEY=os.getenv("SECRET_KEY"),
-        SQLALCHEMY_DATABASE_URI=os.getenv("DATABASE_URL"),
+        SECRET_KEY=os.getenv("SECRET_KEY", "default_secret"),
+        SQLALCHEMY_DATABASE_URI=os.getenv("DATABASE_URL", "sqlite:///db.sqlite3"),
         SQLALCHEMY_TRACK_MODIFICATIONS=False,
-        EBUG=False
+        DEBUG=False,
+        JWT_SECRET_KEY=os.getenv("JWT_SECRET_KEY", "supersecretkey")
     )
 
     if test_config:
         app.config.update(test_config)
 
     db.init_app(app)
+    jwt = JWTManager(app)
 
     @app.errorhandler(HTTPException)
     def handle_http_exception(e):
