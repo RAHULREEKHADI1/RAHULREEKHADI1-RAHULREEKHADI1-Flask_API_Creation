@@ -139,6 +139,10 @@ Client access with API key:
   curl http://127.0.0.1:5000/api/data \
     -H "Authorization: Api-Key <api_key>"
 
+Log access with ADMIN TOKEN:
+  curl -X GET "http://127.0.0.1:5000/admin/logs/?page=1&limit=10" \
+  -H "Authorization: Bearer <access_token>"
+
 Error handling
 
 - HTTP exceptions are returned as JSON: { "error": "..." }.

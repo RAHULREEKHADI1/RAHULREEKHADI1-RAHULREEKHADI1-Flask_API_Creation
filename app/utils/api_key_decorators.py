@@ -2,7 +2,7 @@ from functools import wraps
 from flask import request, jsonify
 from app.models.api_key import APIKey
 from datetime import datetime, timedelta
-from app import db
+from app.extensions import db
 
 def api_key_required(func):
     @wraps(func)
