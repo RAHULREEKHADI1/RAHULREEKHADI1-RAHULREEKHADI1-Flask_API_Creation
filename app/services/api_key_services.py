@@ -1,5 +1,5 @@
 from app.models.api_key import APIKey
-from app import db
+from app.extensions import db
 import secrets
 
 def create_api_key(client_name, daily_limit=1000):

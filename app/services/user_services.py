@@ -1,4 +1,4 @@
-from app import db
+from app.extensions import db
 from app.models.user import User
 from sqlalchemy.exc import IntegrityError
 from werkzeug.exceptions import BadRequest, Conflict, NotFound, Unauthorized

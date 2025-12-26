@@ -1,11 +1,10 @@
 from flask import Flask, jsonify
-from flask_sqlalchemy import SQLAlchemy
 from werkzeug.exceptions import HTTPException
 from dotenv import load_dotenv
-from flask_jwt_extended import JWTManager
 from datetime import timedelta
+from .extensions import db, jwt
+from app.services.request_logger import start_timer, log_request
 
-db = SQLAlchemy()
 load_dotenv()
 
 
@@ -28,7 +27,10 @@ def create_app(test_config=None):
         app.config.update(test_config)
 
     db.init_app(app)
-    jwt = JWTManager(app)
+    jwt.init_app(app)
+
+    app.before_request(start_timer)
+    app.after_request(log_request)
 
     @app.errorhandler(HTTPException)
     def handle_http_exception(e):
@@ -36,7 +38,7 @@ def create_app(test_config=None):
             "error": e.description
         }), e.code
 
-
+    
     from .routes.user_routes import api
     app.register_blueprint(api)
 
@@ -45,6 +47,10 @@ def create_app(test_config=None):
 
     from .routes.client_routes import client_api
     app.register_blueprint(client_api)
+
+    from .routes.log_routes import log_api
+    app.register_blueprint(log_api)
+
 
     with app.app_context():
         db.create_all()
