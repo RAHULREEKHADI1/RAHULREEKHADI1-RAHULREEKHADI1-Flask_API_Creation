@@ -40,6 +40,12 @@ def create_app(test_config=None):
     from .routes.user_routes import api
     app.register_blueprint(api)
 
+    from .routes.admin_routes import admin_api
+    app.register_blueprint(admin_api)
+
+    from .routes.client_routes import client_api
+    app.register_blueprint(client_api)
+
     with app.app_context():
         db.create_all()
 

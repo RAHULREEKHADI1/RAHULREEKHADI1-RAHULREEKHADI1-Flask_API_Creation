@@ -11,6 +11,7 @@ def signup(data):
     name = data.get("name", "").strip()
     email = data.get("email", "").strip()
     password = data.get("password", "").strip()
+    role = data.get("role", "user")
 
     if not name or not email or not password:
         raise BadRequest("Name, Password and email are required")
@@ -26,7 +27,7 @@ def signup(data):
     except EmailNotValidError:
         raise BadRequest("Invalid email format")
 
-    user = User(name=name, email=email)
+    user = User(name=name, email=email,role=role)
     user.set_password(password)
 
     db.session.add(user)
@@ -37,7 +38,7 @@ def signup(data):
         db.session.rollback()
         raise Conflict("Email already exists")
     
-    access_token = create_access_token(identity=str(user.id))
+    access_token = create_access_token(identity=str(user.id), additional_claims={"role": user.role})
 
     return {
         "user": user.to_dict(),
@@ -62,8 +63,8 @@ def login(data):
     if not user or not user.check_password(data["password"]):
         raise Unauthorized("Invalid email or password")
 
-    access_token = create_access_token(identity=str(user.id))
-    refresh_token = create_refresh_token(identity=str(user.id))
+    access_token = create_access_token(identity=str(user.id), additional_claims={"role": user.role})
+    refresh_token = create_refresh_token(identity=str(user.id), additional_claims={"role": user.role})
 
     return {
         "user": user.to_dict(),
@@ -104,4 +105,5 @@ def delete_user(user_id):
 
 
 def refresh_access_token(user_id):
-    return create_access_token(identity=str(user_id))
+    user = User.query.get_or_404(user_id)
+    return create_access_token(identity=str(user_id), additional_claims={"role": user.role})
