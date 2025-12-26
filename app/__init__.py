@@ -51,6 +51,8 @@ def create_app(test_config=None):
     from .routes.log_routes import log_api
     app.register_blueprint(log_api)
 
+    from .routes.analytics_routes import analytics_api
+    app.register_blueprint(analytics_api)
 
     with app.app_context():
         db.create_all()
