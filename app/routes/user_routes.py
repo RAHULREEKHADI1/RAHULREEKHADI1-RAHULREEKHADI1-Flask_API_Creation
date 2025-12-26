@@ -9,6 +9,7 @@ from app.services.user_services import (
     refresh_access_token
 )
 from flask_jwt_extended import jwt_required, get_jwt_identity
+from app.extensions import limiter
 
 api = Blueprint("api", __name__)
 
@@ -18,12 +19,14 @@ def home_page():
     return jsonify({"message": "User API"}), 200
 
 @api.route("/login",methods=["POST"])
+@limiter.limit("5 per minute")
 def login_route():
     response = login(request.get_json() or {})
     return jsonify(response), 200
 
 
 @api.route("/signup", methods=["POST"])
+@limiter.limit("3 per minute")
 def signup_route():
     response = signup(request.get_json() or {})
     return jsonify(response), 201

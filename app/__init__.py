@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from datetime import timedelta
 from .extensions import db, jwt
 from app.services.request_logger import start_timer, log_request
+from app.extensions import limiter
 
 load_dotenv()
 
@@ -28,6 +29,7 @@ def create_app(test_config=None):
 
     db.init_app(app)
     jwt.init_app(app)
+    limiter.init_app(app)
 
     app.before_request(start_timer)
     app.after_request(log_request)
