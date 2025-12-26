@@ -9,3 +9,5 @@ class APIKey(db.Model):
     daily_limit = db.Column(db.Integer, default=1000)
     is_active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    daily_usage = db.Column(db.Integer, default=0)
+    last_reset = db.Column(db.DateTime, default=datetime.utcnow)
