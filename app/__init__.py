@@ -5,6 +5,7 @@ from datetime import timedelta
 from .extensions import db, jwt
 from app.services.request_logger import start_timer, log_request
 from app.extensions import limiter
+from flask_cors import CORS
 
 load_dotenv()
 
@@ -22,6 +23,13 @@ def create_app(test_config=None):
         JWT_SECRET_KEY=os.getenv("JWT_SECRET_KEY", "supersecretkey"),
         JWT_ACCESS_TOKEN_EXPIRES=timedelta(minutes=5),
         JWT_REFRESH_TOKEN_EXPIRES=timedelta(days=7)
+    )
+    CORS(
+        app,
+        origins=["http://localhost:3000"],
+        supports_credentials=True,
+        methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allow_headers=["Content-Type", "Authorization"]
     )
 
     if test_config:

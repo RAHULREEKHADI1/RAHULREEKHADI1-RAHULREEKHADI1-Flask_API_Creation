@@ -25,7 +25,8 @@ const SignupPage: React.FC = () => {
     setLoading(true);
 
     const endpoint = isSignup ? "/signup" : "/login";
-    const url = `http://127.0.0.1:5000${endpoint}`;
+    const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}${endpoint}`;
+    console.log(url);
 
     try {
       const response = await fetch(url, {
