@@ -1,5 +1,10 @@
 from app import create_app
 from flask_cors import CORS
+import warnings
+warnings.filterwarnings(
+    "ignore",
+    message="Using the in-memory storage for tracking rate limits"
+)
 
 app = create_app()
 CORS(app, 
