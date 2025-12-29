@@ -3,10 +3,12 @@ import Home from "@/app/page";
 import { useRouter } from "next/navigation";
 
 interface HeaderProps {
-    showSignUp?: boolean
+    showSignUp?: boolean,
+    showPricing?:boolean,
+    showHome?:boolean
 }
 
-export default function Header({ showSignUp = true }: HeaderProps) {
+export default function Header({ showSignUp = true,showPricing=true,showHome=false }: HeaderProps) {
 
     const router = useRouter();
     const handleSignup = () => {
@@ -22,9 +24,9 @@ export default function Header({ showSignUp = true }: HeaderProps) {
                 </div>
                 <div>
                     <div className="flex text-[#789DA9] text-md md:text-lg font-medium gap-6 lg:gap-14">
-                        {!showSignUp && <p className="py-1 px-2 hover:scale-110 transform transition-transform duration-300  cursor-pointer" onClick={() => router.push('/')}>Home</p>}
+                        {showHome && <p className="py-1 px-2 hover:scale-110 transform transition-transform duration-300  cursor-pointer" onClick={() => router.push('/')}>Home</p>}
                         <p className="py-1 px-2 hover:scale-110 transform transition-transform duration-300  cursor-pointer">Feature</p>
-                        <p className="py-1 px-2 hover:scale-110 transform transition-transform duration-300  cursor-pointer">Pricing</p>
+                        {showPricing && <p className="py-1 px-2 hover:scale-110 transform transition-transform duration-300  cursor-pointer" onClick={()=>{router.push('/pricing')}}>Pricing</p>}
                         <p className="py-1 px-2 hover:scale-110 transform transition-transform duration-300  cursor-pointer">Blog</p>
                         {showSignUp && <button className="py-1 px-4 bg-[#F47C3E] text-white rounded-md hover:shadow-lg hover:shadow-orange-500 hover:bg-orange-500 hover:scale-105 transform transition duration-300" onClick={handleSignup}>Sign up</button>}
                     </div>
