@@ -74,9 +74,9 @@ const pricing: React.FC = () => {
             style={{ backgroundImage: "url('/images/homepage_background.png')" }}>
             <div className="px-4 md:px-10 lg:px-16 py-10">
                 <Header showPricing={false} showHome={true} />
-                <div className="flex flex-col gap-6">
+                <div className="flex flex-col gap-6 mt-10">
                     <div className="flex justify-center">
-                        <h2 className="text-6xl text-white font-semibold">Pricing</h2>
+                        <h2 className="text-4xl lg:text-6xl text-white font-semibold">Pricing</h2>
                     </div>
                     <p className="text-center text-lg text-white">Go from idea to design in minutes with the power of AI!</p>
                 </div>
