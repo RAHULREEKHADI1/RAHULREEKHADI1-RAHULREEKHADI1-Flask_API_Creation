@@ -5,10 +5,12 @@ import { useRouter } from "next/navigation";
 interface HeaderProps {
     showSignUp?: boolean,
     showPricing?:boolean,
-    showHome?:boolean
+    showHome?:boolean,
+    showBlog?:boolean,
+    showFeature?:boolean
 }
 
-export default function Header({ showSignUp = true,showPricing=true,showHome=false }: HeaderProps) {
+export default function Header({ showSignUp = true,showPricing=true,showHome=false,showBlog=true, showFeature=true }: HeaderProps) {
 
     const router = useRouter();
     const handleSignup = () => {
@@ -25,10 +27,10 @@ export default function Header({ showSignUp = true,showPricing=true,showHome=fal
                 <div>
                     <div className="flex text-[#789DA9] text-md md:text-lg font-medium gap-6 lg:gap-14">
                         {showHome && <p className="py-1 px-2 hover:scale-110 transform transition-transform duration-300  cursor-pointer" onClick={() => router.push('/')}>Home</p>}
-                        <p className="py-1 px-2 hover:scale-110 transform transition-transform duration-300  cursor-pointer">Feature</p>
+                        {showFeature && <p className="py-1 px-2 hover:scale-110 transform transition-transform duration-300  cursor-pointer" onClick={()=> router.push('/feature')}>Feature</p>}
                         {showPricing && <p className="py-1 px-2 hover:scale-110 transform transition-transform duration-300  cursor-pointer" onClick={()=>{router.push('/pricing')}}>Pricing</p>}
-                        <p className="py-1 px-2 hover:scale-110 transform transition-transform duration-300  cursor-pointer">Blog</p>
-                        {showSignUp && <button className="py-1 px-4 bg-[#F47C3E] text-white rounded-md hover:shadow-lg hover:shadow-orange-500 hover:bg-orange-500 hover:scale-105 transform transition duration-300" onClick={handleSignup}>Sign up</button>}
+                        {showBlog && <p className="py-1 px-2 hover:scale-110 transform transition-transform duration-300  cursor-pointer" onClick={()=> router.push('/blog')}>Blog</p>}
+                        {showSignUp && <button className="py-1 px-2 sm:px-4 bg-[#F47C3E] text-white rounded-md hover:shadow-lg hover:shadow-orange-500 hover:bg-orange-500 hover:scale-105 transform transition duration-300" onClick={handleSignup}>Sign up</button>}
                     </div>
                 </div>
             </div>
