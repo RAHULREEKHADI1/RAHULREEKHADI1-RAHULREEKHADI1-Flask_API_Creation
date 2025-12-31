@@ -165,7 +165,7 @@ const pricing: React.FC = () => {
                 </div>
 
                 {COMPARISON_DATA.map((row, idx) => (
-                    <div key={idx} className="grid grid-cols-[2fr_repeat(4,1fr)] py-6 border-b border-slate-800/40 items-center group hover:bg-white/[0.02] transition-colors">
+                    <div key={idx} className="grid grid-cols-[2fr_repeat(4,1fr)] py-6 border-b border-slate-800/40 items-center group hover:bg-white/2 transition-colors">
                         <div className="pl-2">
                             <p className="text-white font-medium group-hover:text-orange-400 transition-colors">{row.title}</p>
                             <p className="text-xs text-slate-500">{row.desc}</p>
