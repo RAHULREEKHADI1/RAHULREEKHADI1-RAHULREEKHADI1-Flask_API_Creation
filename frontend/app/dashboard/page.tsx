@@ -7,7 +7,7 @@ const dashboard: React.FC = () => {
         <div className="min-h-screen bg-cover bg-center bg-no-repeat"
             style={{ backgroundImage: "url('/images/homepage_background.png')" }}>
             <div className="px-4 md:px-10 lg:px-16 py-10">
-                <Header />
+                <Header showDashboard={false}/>
             </div>
             <div className="flex flex-col items-center justify-center">
                 <div className="text-3xl text-white">
