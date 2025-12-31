@@ -20,6 +20,8 @@ MarkupSafe==3.0.3
 mdurl==0.1.2
 ordered-set==4.1.0
 packaging==24.2
+psycopg==3.2.13
+psycopg-binary==3.2.13
 psycopg2-binary==2.9.11
 Pygments==2.19.2
 PyJWT==2.10.1
