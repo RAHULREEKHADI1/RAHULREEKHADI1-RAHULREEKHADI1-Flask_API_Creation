@@ -7,10 +7,11 @@ interface HeaderProps {
     showPricing?: boolean,
     showHome?: boolean,
     showBlog?: boolean,
-    showFeature?: boolean
+    showFeature?: boolean,
+    showDashboard?:boolean,
 }
 
-export default function Header({ showSignUp = true, showPricing = true, showHome = false, showBlog = true, showFeature = true }: HeaderProps) {
+export default function Header({ showSignUp = true, showPricing = true, showHome = false, showBlog = true, showFeature = true,showDashboard=true }: HeaderProps) {
 
     const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
     const router = useRouter();
@@ -39,6 +40,7 @@ export default function Header({ showSignUp = true, showPricing = true, showHome
                 <div>
                     <div className="flex text-[#789DA9] text-md md:text-lg font-medium gap-6 lg:gap-14">
                         {showHome && <p className="py-1 px-2 hover:scale-110 transform transition-transform duration-300  cursor-pointer" onClick={() => router.push('/')}>Home</p>}
+                        {isLoggedIn && showDashboard && <p className="py-1 px-2 hover:scale-110 transform transition-transform duration-300  cursor-pointer" onClick={() => router.push('/dashboard')}>Dashboard</p>}
                         {showFeature && <p className="py-1 px-2 hover:scale-110 transform transition-transform duration-300  cursor-pointer" onClick={() => router.push('/feature')}>Feature</p>}
                         {showPricing && <p className="py-1 px-2 hover:scale-110 transform transition-transform duration-300  cursor-pointer" onClick={() => { router.push('/pricing') }}>Pricing</p>}
                         {showBlog && <p className="py-1 px-2 hover:scale-110 transform transition-transform duration-300  cursor-pointer" onClick={() => router.push('/blog')}>Blog</p>}

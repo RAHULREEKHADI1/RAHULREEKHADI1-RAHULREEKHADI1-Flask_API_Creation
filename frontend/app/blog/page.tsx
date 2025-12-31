@@ -6,7 +6,7 @@ const Blog: React.FC = () => {
 
 
     const tags = [
-        { label: "Uizarding News", color: "bg-purple-600" },
+        { label: "Revolutionize News", color: "bg-purple-600" },
         { label: "AI design", color: "bg-blue-600" },
         { label: "Wireframing", color: "bg-green-600" },
         { label: "Mockups", color: "bg-pink-600" },
