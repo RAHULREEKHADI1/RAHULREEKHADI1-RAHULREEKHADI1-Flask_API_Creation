@@ -17,7 +17,7 @@ def create_app(test_config=None):
     import os
     app.config.from_mapping(
         SECRET_KEY=os.getenv("SECRET_KEY", "default_secret"),
-        SQLALCHEMY_DATABASE_URI=os.getenv("DATABASE_URL", "sqlite:///db.sqlite3"),
+        SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL"),
         SQLALCHEMY_TRACK_MODIFICATIONS=False,
         DEBUG=False,
         JWT_SECRET_KEY=os.getenv("JWT_SECRET_KEY", "supersecretkey"),
