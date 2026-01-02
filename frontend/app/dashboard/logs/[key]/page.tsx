@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { ChevronLeft, Clock, Activity, Zap, ChevronRight, AlertCircle, LogOut, Filter, Calendar } from 'lucide-react';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
+import { ChevronLeft, Clock, Activity, Zap, ChevronRight, AlertCircle, LogOut, Filter, Calendar, AlertTriangle, Globe } from 'lucide-react';
+import { authorizedFetch } from '@/utils/api';
 
 interface LogEntry {
     timestamp: string;
@@ -15,6 +16,7 @@ interface LogEntry {
 
 export default function RequestLogsPage() {
     const params = useParams();
+    const searchParams = useSearchParams();
     const router = useRouter();
 
     const [logs, setLogs] = useState<LogEntry[]>([]);
@@ -22,30 +24,51 @@ export default function RequestLogsPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
+    const [analytics, setAnalytics] = useState({
+        errorRate: 0,
+        topEndpoint: 'N/A'
+    });
+
     const [statusFilter, setStatusFilter] = useState('');
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
 
     const handleLogout = () => {
-        localStorage.removeItem('access_token');
+        localStorage.clear();
         router.push('/');
     };
+
+    const fetchAnalytics = useCallback(async () => {
+        try {
+            const userId = searchParams.get('user_id');
+            const query = userId ? `?user_id=${userId}` : '';
+
+            const [errorRes, topRes] = await Promise.all([
+                authorizedFetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/analytics/error-rate${query}`),
+                authorizedFetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/analytics/top-endpoints${query}`)
+            ]);
+
+            const errorData = await errorRes.json();
+            const topData = await topRes.json();
+
+            setAnalytics({
+                errorRate: errorData.error_rate_percent || 0,
+                topEndpoint: topData[0]?.endpoint || 'N/A'
+            });
+        } catch (err) {
+            console.error("Analytics fetch failed");
+        }
+    }, [searchParams]);
 
     const fetchLogs = useCallback(async (pageNumber = 1) => {
         try {
             setLoading(true);
             setError(null);
             
-            const token = localStorage.getItem('access_token');
             const apiKey = params.key;
-
-            if (!apiKey || !token) {
-                setError("Authentication missing. Please log in again.");
-                return;
-            }
+            const userId = searchParams.get('user_id');
 
             const queryParams = new URLSearchParams({
-                api_key: apiKey.toString(),
                 page: pageNumber.toString(),
                 limit: '50',
                 status_code: statusFilter,
@@ -53,15 +76,12 @@ export default function RequestLogsPage() {
                 end: endDate
             });
 
+            if (apiKey) queryParams.append('api_key', apiKey.toString());
+            if (userId) queryParams.append('user_id', userId);
+
             const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/logs/?${queryParams.toString()}`;
 
-            const res = await fetch(url, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            });
+            const res = await authorizedFetch(url);
 
             if (res.status === 429) {
                 setError("Rate limit exceeded (429). Please reset your API usage in the database.");
@@ -85,11 +105,12 @@ export default function RequestLogsPage() {
         } finally {
             setLoading(false);
         }
-    }, [params.key, statusFilter, startDate, endDate]);
+    }, [params.key, searchParams, statusFilter, startDate, endDate]);
 
     useEffect(() => {
         fetchLogs(1);
-    }, [fetchLogs]);
+        fetchAnalytics();
+    }, [fetchLogs, fetchAnalytics]);
 
     const avgResponse = logs.length > 0
         ? Math.round(logs.reduce((acc, log) => acc + (log.response_time_ms || 0), 0) / logs.length)
@@ -114,9 +135,9 @@ export default function RequestLogsPage() {
             </div>
 
             <div className="mb-8">
-                <h2 className="text-4xl font-black text-gray-900 tracking-tight">Request Logs</h2>
+                <h2 className="text-4xl font-black text-gray-900 tracking-tight text-left">Request Logs</h2>
                 <p className="text-gray-500 font-mono text-sm mt-2 bg-gray-100 w-fit px-3 py-1 rounded-full border border-gray-200">
-                    Key: {params.key?.toString()}
+                    Key: {params.key?.toString() || 'Global View'}
                 </p>
             </div>
 
@@ -127,7 +148,7 @@ export default function RequestLogsPage() {
                 </div>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 text-left">
                 <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex items-center gap-4">
                     <div className="bg-green-50 p-3 rounded-2xl text-green-600"><Activity size={24} /></div>
                     <div>
@@ -142,10 +163,24 @@ export default function RequestLogsPage() {
                         <p className="text-2xl font-black text-gray-900">{avgResponse} <span className="text-sm font-normal text-gray-400">ms</span></p>
                     </div>
                 </div>
+                <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex items-center gap-4">
+                    <div className="bg-red-50 p-3 rounded-2xl text-red-600"><AlertTriangle size={24} /></div>
+                    <div>
+                        <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Error Rate</p>
+                        <p className="text-2xl font-black text-gray-900">{analytics.errorRate}%</p>
+                    </div>
+                </div>
+                <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex items-center gap-4">
+                    <div className="bg-orange-50 p-3 rounded-2xl text-orange-600"><Globe size={24} /></div>
+                    <div className="overflow-hidden">
+                        <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Top Route</p>
+                        <p className="text-lg font-black text-gray-900 truncate">{analytics.topEndpoint}</p>
+                    </div>
+                </div>
             </div>
 
             <div className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm mb-8 flex flex-wrap gap-6 items-end">
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-2 text-left">
                     <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1 flex items-center gap-1.5">
                         <Filter size={12} /> Status Code
                     </label>
@@ -163,7 +198,7 @@ export default function RequestLogsPage() {
                     </select>
                 </div>
 
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-2 text-left">
                     <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1 flex items-center gap-1.5">
                         <Calendar size={12} /> Start Date
                     </label>
@@ -175,7 +210,7 @@ export default function RequestLogsPage() {
                     />
                 </div>
 
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-2 text-left">
                     <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1 flex items-center gap-1.5">
                         <Calendar size={12} /> End Date
                     </label>

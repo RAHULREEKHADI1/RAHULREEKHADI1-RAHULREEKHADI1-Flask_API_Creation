@@ -1,5 +1,6 @@
 from flask import request, g
 from datetime import datetime
+from flask_jwt_extended import get_jwt_identity, verify_jwt_in_request
 
 def start_timer():
     g.start = datetime.utcnow()
@@ -7,7 +8,7 @@ def start_timer():
 def log_request(response):
     if request.path.startswith('/logs') or request.method == 'OPTIONS':
         return response
-
+    found_user_id = None
     try:
         end = datetime.utcnow()
         duration = (end - g.start).total_seconds() * 1000 if hasattr(g, 'start') else 0
@@ -23,6 +24,12 @@ def log_request(response):
         from app.extensions import db
         
         found_user_id = getattr(g, 'user_id', None)
+        if not found_user_id:
+            try:
+                verify_jwt_in_request(optional=True)
+                found_user_id = get_jwt_identity()
+            except:
+                pass
         
         if not found_user_id and api_key:
             key_record = APIKey.query.filter_by(key=api_key).first()
