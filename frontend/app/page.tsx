@@ -2,18 +2,31 @@
 import Footer from "@/components/ui/Footer";
 import Header from "@/components/ui/Header";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function Home() {
 
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
   const router = useRouter();
-  const handleSignup = ()=>{
+  const handleSignup = () => {
     router.push("/signup")
   }
+
+  const handleDashboard = () => {
+    router.push("/dashboard")
+  }
+
+  useEffect(() => {
+    const jwt = localStorage.getItem("access_token");
+    setIsLoggedIn(!!jwt);
+  }, [isLoggedIn]);
+
+
   return (
     <div className="min-h-screen bg-cover bg-center bg-no-repeat"
       style={{ backgroundImage: "url('/images/homepage_background.png')" }}>
       <div className="px-4 md:px-10 lg:px-16 py-10">
-        <Header/>
+        <Header />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 px-6 md:px-16 items-center py-8 sm:py-6">
           <div>
             <h3 className="text-white font-semibold text-4xl md:text-6xl">Unleash Intelligent Design</h3>
@@ -22,8 +35,8 @@ export default function Home() {
             </p>
             <div className="mt-6 flex gap-4">
               <button className="bg-[#F47C3E] text-white rounded px-6 py-2 font-semibold hover:bg-orange-500 hover:shadow-lg hover:shadow-orange-500 hover:scale-105 transform transition duration-300"
-              onClick={handleSignup}>
-                START FREE TRIAL
+                onClick={!isLoggedIn ? handleSignup : handleDashboard}>
+                {!isLoggedIn ? "START FREE TRIAL": "GO TO DASHBOARD"}
               </button>
               <button className="border border-[#789DA9] text-white rounded hover:shadow-xl hover:shadow-[#225061] px-6 py-2 font-semibold hover:scale-105 transform transition duration-300">
                 LEARN MORE
@@ -96,7 +109,7 @@ export default function Home() {
           </p>
 
           <button className="bg-linear-to-r from-[#225061] to-[#27304F] text-white px-6 py-3 rounded-lg text-lg font-semibold hover:scale-105 transform transition duration-300 cursor-pointer"
-          onClick={handleSignup}>
+            onClick={handleSignup}>
             Get Started &rarr;
           </button>
         </div>
@@ -157,13 +170,13 @@ export default function Home() {
 
           <div>
             <button className="py-2 px-6 bg-[#F47C3E] text-white rounded-md font-semibold hover:shadow-lg hover:shadow-orange-500 hover:bg-orange-500 hover:scale-105 transform transition duration-300"
-            onClick={handleSignup}>
-              Sign Up For Free
+              onClick={!isLoggedIn ? handleSignup : handleDashboard}>
+              {!isLoggedIn ? "Sign Up For Free" : "Go to dashboard"}
             </button>
           </div>
         </div>
 
-        <Footer/>
+        <Footer />
 
       </div>
     </div>

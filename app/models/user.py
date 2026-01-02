@@ -7,6 +7,7 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(256),nullable=False)
     role = db.Column(db.String(20), default="user") 
+    api_keys = db.relationship('APIKey', backref='owner', lazy=True)
 
     def set_password(self,password):
         self.password_hash = generate_password_hash(

@@ -49,8 +49,18 @@ const SignupPage: React.FC = () => {
         } else {
           localStorage.setItem("access_token", data.access_token);
           localStorage.setItem("refresh_token", data.refresh_token);
+          const userRole = data.user?.role || 'user';
+          localStorage.setItem("user_role", userRole);
+          console.log(userRole);
+          
           toast.success("Welcome back!");
-          router.push("/dashboard");
+
+          if (userRole === "admin") {
+            router.push("/admin/users");
+          } else {
+            router.push("/dashboard");
+          }
+
         }
       } else {
         toast.error(data.error || "Action failed");

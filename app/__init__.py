@@ -32,6 +32,9 @@ def create_app(test_config=None):
         allow_headers=["Content-Type", "Authorization"]
     )
 
+    from flask_migrate import Migrate
+    migrate = Migrate(app, db)
+
     if test_config:
         app.config.update(test_config)
 
