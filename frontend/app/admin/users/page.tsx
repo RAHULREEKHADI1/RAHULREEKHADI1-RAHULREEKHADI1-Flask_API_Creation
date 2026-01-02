@@ -90,7 +90,7 @@ export default function AdminUsersPage() {
                                 <tr key={user.id} className="hover:bg-gray-50/50 transition-colors">
                                     <td className="px-8 py-4">
                                         <div className="flex flex-col text-left">
-                                            <span className="font-bold text-gray-900">{user.username}</span>
+                                            <span className="font-bold text-gray-900">{user.name}</span>
                                             <span className="text-xs text-gray-400 font-mono">{user.email}</span>
                                         </div>
                                     </td>

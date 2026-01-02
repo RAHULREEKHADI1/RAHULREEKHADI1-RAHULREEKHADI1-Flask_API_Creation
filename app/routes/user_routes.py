@@ -14,6 +14,9 @@ from app.models.api_key import APIKey
 from app.extensions import db
 import secrets
 from flask_cors import cross_origin
+from app.services.api_key_services import (
+    create_api_key,toggle_api_key,regenerate_api_key
+)
 
 api = Blueprint("api", __name__)
 
@@ -39,40 +42,20 @@ def signup_route():
 @cross_origin(origin='localhost', headers=['Content-Type', 'Authorization'])
 @jwt_required()
 def create_key():
-
-    if request.method == 'OPTIONS':
-        return jsonify({"msg": "ok"}), 200
-    
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     
     if request.method == 'GET':
-        keys = APIKey.query.filter_by(user_id=int(user_id)).all()
+        keys = APIKey.query.filter_by(user_id=user_id).all()
         return jsonify([{
-            "id": k.id,
-            "client_name": k.client_name,
-            "key": k.key,
-            "is_active": k.is_active
+            "id": k.id, "client_name": k.client_name, 
+            "key": k.key, "is_active": k.is_active
         } for k in keys]), 200
 
     if request.method == 'POST':
-        claims = get_jwt()
-        user_role = claims.get("role")
-        new_key = secrets.token_urlsafe(32)
-        
-        api_entry = APIKey(
-            key=new_key, 
-            user_id=int(user_id),
-            client_name=request.json.get('name', 'Default Client')
-        )
-        
-        db.session.add(api_entry)
-        db.session.commit()
-        
-        return jsonify({
-            "api_key": new_key,
-            "id": api_entry.id,
-            "role_confirmed": user_role
-        }), 201
+        data = request.get_json()
+        name = data.get('name', 'Default Client')
+        key = create_api_key(name, user_id)
+        return jsonify({"api_key": key.key, "id": key.id}), 201
 
 @api.route('/client/api/keys/<int:key_id>/toggle', methods=['PATCH'])
 @cross_origin(origin='localhost', headers=['Content-Type', 'Authorization'])
@@ -80,13 +63,8 @@ def create_key():
 def toggle_key(key_id):
     user_id = int(get_jwt_identity())
     api_key = APIKey.query.filter_by(id=key_id, user_id=user_id).first_or_404()
-    api_key.is_active = not api_key.is_active
-    db.session.commit()
-    
-    return jsonify({
-        "msg": f"Key {'enabled' if api_key.is_active else 'disabled'}",
-        "is_active": api_key.is_active
-    })
+    toggle_api_key(api_key)
+    return jsonify({"is_active": api_key.is_active})
 
 @api.route('/client/api/keys/<int:key_id>/regenerate', methods=['POST'])
 @cross_origin(origin='localhost', headers=['Content-Type', 'Authorization'])
@@ -94,10 +72,8 @@ def toggle_key(key_id):
 def regenerate_key(key_id):
     user_id = int(get_jwt_identity())
     api_key = APIKey.query.filter_by(id=key_id, user_id=user_id).first_or_404()
-    new_secret = secrets.token_urlsafe(32)
-    api_key.key = new_secret    
-    db.session.commit()
-    return jsonify({"new_api_key": new_secret})
+    regenerate_api_key(api_key)
+    return jsonify({"new_api_key": api_key.key})
 
 @api.route("/users", methods=["GET"])
 @jwt_required()

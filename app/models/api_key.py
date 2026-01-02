@@ -11,4 +11,4 @@ class APIKey(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     daily_usage = db.Column(db.Integer, default=0)
     last_reset = db.Column(db.DateTime, default=datetime.utcnow)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
