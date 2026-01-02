@@ -9,3 +9,4 @@ class APIRequestLog(db.Model):
     status_code = db.Column(db.Integer)
     response_time_ms = db.Column(db.Float)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)

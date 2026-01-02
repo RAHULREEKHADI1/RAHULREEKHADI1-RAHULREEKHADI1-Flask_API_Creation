@@ -2,13 +2,26 @@
 import Footer from "@/components/ui/Footer";
 import Header from "@/components/ui/Header";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 const Feature: React.FC = () => {
 
+    const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
     const router = useRouter();
     const handleSignup = () => {
         router.push("/signup")
     }
+
+    const handleDashboard = () => {
+        router.push("/dashboard")
+    }
+
+    useEffect(() => {
+        const jwt = localStorage.getItem("access_token");
+        setIsLoggedIn(!!jwt);
+    }, [isLoggedIn]);
+
+
     return (
         <div className="min-h-screen bg-cover bg-center bg-no-repeat"
             style={{ backgroundImage: "url('/images/homepage_background.png')" }}>
@@ -19,8 +32,8 @@ const Feature: React.FC = () => {
                         <h4 className="text-4xl lg:text-6xl text-white font-semibold">Features</h4>
                         <p className="text-white text-center text-xl">Welcome to the official Revolutionize AI blog, where you can learn about all things design and read about all the latest magical Revolutionize AIing news. Whether you are a seasoned pro or a design newcomer, there is something for everyone in the Revolutionize AI Blog of Spells.</p>
                         <button className="py-2 px-6 bg-[#F47C3E] text-white rounded-md font-semibold hover:shadow-lg hover:shadow-orange-500 hover:bg-orange-500 hover:scale-105 transform transition duration-300"
-                            onClick={handleSignup}>
-                            Sign Up For Free
+                            onClick={!isLoggedIn ? handleSignup : handleDashboard}>
+                            {!isLoggedIn ? "Sign Up For Free" : "Go to dashboard"}
                         </button>
                     </div>
 
@@ -141,18 +154,14 @@ const Feature: React.FC = () => {
 
                     <div className="py-10 px-4 overflow-hidden">
                         <div className="max-w-7xl mx-auto">
-                            {/* Heading Section */}
                             <div className="text-center mb-16">
                                 <h3 className="text-pink-200/40 text-xs md:text-sm font-bold uppercase tracking-[0.4em] mb-4">
                                     Used by individuals and teams at the world's boldest companies
                                 </h3>
-                                {/* Animated pink glow line */}
                                 <div className="h-0.5 w-24 bg-linear-to-r from-transparent via-pink-500 to-transparent mx-auto shadow-[0_0_15px_#ec4899]"></div>
                             </div>
 
-                            {/* Marquee Wrapper */}
                             <div className="relative flex group cursor-default">
-                                {/* Main Marquee Row */}
                                 <div className="flex animate-marquee whitespace-nowrap gap-4 md:gap-10 py-4">
                                     {["Google", "Amazon", "Meta", "Microsoft", "Netflix", "Tesla", "SpaceX", "Adobe", "Spotify", "Airbnb"].map((company, i) => (
                                         <div
@@ -164,7 +173,6 @@ const Feature: React.FC = () => {
                                     ))}
                                 </div>
 
-                                {/* Duplicate Row for Loop */}
                                 <div className="flex absolute top-0 animate-marquee2 whitespace-nowrap gap-4 md:gap-10 py-4" aria-hidden="true">
                                     {["Google", "Amazon", "Meta", "Microsoft", "Netflix", "Tesla", "SpaceX", "Adobe", "Spotify", "Airbnb"].map((company, i) => (
                                         <div
@@ -176,32 +184,31 @@ const Feature: React.FC = () => {
                                     ))}
                                 </div>
 
-                                {/* Side Fades - Matching a dark background */}
                                 <div className="absolute inset-y-0 left-0 w-20 md:w-48 bg-linear-to-r from-[#0a0a0a] via-[#0a0a0a]/50 to-transparent z-10 pointer-events-none"></div>
                                 <div className="absolute inset-y-0 right-0 w-20 md:w-48 bg-linear-to-l from-[#0a0a0a] via-[#0a0a0a]/50 to-transparent z-10 pointer-events-none"></div>
                             </div>
                         </div>
                     </div>
                     <div className="flex flex-col md:flex-row items-center justify-between gap-6 md:gap-0">
-                              <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6">
-                                <img src="/images/revolutionize_logo.png" alt="company_logo" className="h-10 md:h-12" />
-                                <div className="flex flex-col gap-1 text-center md:text-left">
-                                  <p className="text-white text-lg md:text-xl font-semibold">REVOLUTIONIZE AI</p>
-                                  <p className="text-[#B0C4CC] text-sm md:text-base">
+                        <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6">
+                            <img src="/images/revolutionize_logo.png" alt="company_logo" className="h-10 md:h-12" />
+                            <div className="flex flex-col gap-1 text-center md:text-left">
+                                <p className="text-white text-lg md:text-xl font-semibold">REVOLUTIONIZE AI</p>
+                                <p className="text-[#B0C4CC] text-sm md:text-base">
                                     Visualize product ideas fast and easy with AI
-                                  </p>
-                                </div>
-                              </div>
-                    
-                              <div>
-                                <button className="py-2 px-6 bg-[#F47C3E] text-white rounded-md font-semibold hover:shadow-lg hover:shadow-orange-500 hover:bg-orange-500 hover:scale-105 transform transition duration-300"
-                                onClick={handleSignup}>
-                                  Sign Up For Free
-                                </button>
-                              </div>
+                                </p>
                             </div>
-                    
-                            <Footer/>
+                        </div>
+
+                        <div>
+                            <button className="py-2 px-6 bg-[#F47C3E] text-white rounded-md font-semibold hover:shadow-lg hover:shadow-orange-500 hover:bg-orange-500 hover:scale-105 transform transition duration-300"
+                                onClick={!isLoggedIn ? handleSignup : handleDashboard}>
+                                {!isLoggedIn ? "Sign Up For Free" : "Go to dashboard"}
+                            </button>
+                        </div>
+                    </div>
+
+                    <Footer />
                 </div>
             </div>
         </div>
