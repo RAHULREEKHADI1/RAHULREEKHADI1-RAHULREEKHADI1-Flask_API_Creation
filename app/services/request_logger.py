@@ -18,6 +18,9 @@ def log_request(response):
             auth_header = request.headers.get("Authorization")
             if auth_header and auth_header.startswith("Api-Key "):
                 api_key = auth_header.split(" ")[1]
+        
+        if found_user_id is None:
+            return response
 
         from app.models.api_request_log import APIRequestLog
         from app.models.api_key import APIKey

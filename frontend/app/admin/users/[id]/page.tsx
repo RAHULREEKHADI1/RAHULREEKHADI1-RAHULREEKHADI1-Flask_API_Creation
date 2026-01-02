@@ -202,7 +202,7 @@ export default function AdminUserLogsPage() {
                                     <td className="px-8 py-4 font-bold text-gray-900">{k.client_name}</td>
                                     <td className="px-8 py-4">
                                         <div className="flex items-center gap-2">
-                                            <span className="font-mono text-[11px] text-gray-500 bg-gray-50 px-2 py-1 rounded-lg border border-gray-100 truncate max-w-[150px]">{k.key}</span>
+                                            <span className="font-mono text-[11px] text-gray-500 bg-gray-50 px-2 py-1 rounded-lg border border-gray-100 truncate max-w-37.5">{k.key}</span>
                                             <button onClick={() => copyToClipboard(k.key, k.id)} className="text-gray-400 hover:text-indigo-600 transition">
                                                 {copiedId === k.id ? <Check size={14} className="text-green-500" /> : <Copy size={14} />}
                                             </button>
@@ -273,7 +273,7 @@ export default function AdminUserLogsPage() {
                                 logs.map((log: any, i) => (
                                     <tr key={i} className="text-sm hover:bg-gray-50/80 transition-colors">
                                         <td className="px-8 py-4"><span className={`px-2 py-1 rounded-lg text-[10px] font-black ${log.method === 'GET' ? 'bg-blue-50 text-blue-700' : 'bg-emerald-50 text-emerald-700'}`}>{log.method}</span></td>
-                                        <td className="px-8 py-4 font-mono text-xs text-gray-600 truncate max-w-[300px]">{log.endpoint}</td>
+                                        <td className="px-8 py-4 font-mono text-xs text-gray-600 truncate max-w-75">{log.endpoint}</td>
                                         <td className={`px-8 py-4 font-bold ${log.status_code >= 400 ? 'text-red-500' : 'text-green-600'}`}>{log.status_code}</td>
                                         <td className="px-8 py-4 text-gray-400 text-xs font-mono">{log.response_time_ms ? `${log.response_time_ms}ms` : '-'}</td>
                                         <td className="px-8 py-4 text-right text-gray-400 font-mono text-[11px]">{log.timestamp ? new Date(log.timestamp).toLocaleString() : 'N/A'}</td>
@@ -287,7 +287,7 @@ export default function AdminUserLogsPage() {
 
             {isCreateModalOpen && (
                 <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                    <div className="bg-white rounded-[2rem] w-full max-w-md shadow-2xl p-8 text-left">
+                    <div className="bg-white rounded-4xl w-full max-w-md shadow-2xl p-8 text-left">
                         <div className="flex justify-between items-center mb-6 text-gray-900">
                             <h3 className="text-2xl font-black tracking-tight">Issue API Key</h3>
                             <button onClick={() => setIsCreateModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition"><X size={20} /></button>
@@ -302,7 +302,7 @@ export default function AdminUserLogsPage() {
             )}
 
             {confirmAction && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[60] flex items-center justify-center p-4 text-center">
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-15 flex items-center justify-center p-4 text-center">
                     <div className="bg-white rounded-[2.5rem] w-full max-w-sm shadow-2xl p-8 border border-white/20">
                         <div className={`p-4 rounded-3xl mb-6 mx-auto w-fit ${confirmAction.type === 'toggle' ? 'bg-orange-50 text-orange-500' : 'bg-red-50 text-red-500'}`}><AlertCircle size={40} /></div>
                         <h3 className="text-2xl font-black text-gray-900 mb-2">Are you sure?</h3>
