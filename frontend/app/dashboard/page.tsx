@@ -1,7 +1,8 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Key, Shield, Plus, RefreshCw, Power, Copy, CheckCircle, Loader2, LogOut, AlertTriangle, X, Eye, BarChart3, ArrowRight } from 'lucide-react';
+import { authorizedFetch } from '@/utils/api';
 
 interface ApiKey {
   id: number;
@@ -29,22 +30,9 @@ export default function ApiDashboard() {
     newKey?: string;
   }>({ show: false, type: 'toggle', id: null });
 
-  const fetchKeys = async () => {
-    const token = localStorage.getItem('access_token');
-    if (!token) {
-      router.push('/');
-      setLoading(false);
-      return;
-    }
-
+  const fetchKeys = useCallback(async () => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/client/api/keys`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
+      const res = await authorizedFetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/client/api/keys`);
 
       if (res.ok) {
         const data = await res.json();
@@ -58,29 +46,22 @@ export default function ApiDashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchKeys();
-  }, []);
+  }, [fetchKeys]);
 
   const handleLogout = () => {
-    localStorage.removeItem('access_token');
+    localStorage.clear();
     router.push('/');
   };
 
   const handleCreate = async () => {
     if (!newClientName) return;
-    const token = localStorage.getItem('access_token');
-    if (!token) return;
-
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/client/api/keys`, {
+      const res = await authorizedFetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/client/api/keys`, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
         body: JSON.stringify({ name: newClientName })
       });
 
@@ -96,16 +77,10 @@ export default function ApiDashboard() {
 
   const executeToggle = async () => {
     const { id } = confirmModal;
-    const token = localStorage.getItem('access_token');
-    if (!token || id === null) return;
-
+    if (id === null) return;
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/client/api/keys/${id}/toggle`, {
-        method: 'PATCH',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+      const res = await authorizedFetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/client/api/keys/${id}/toggle`, {
+        method: 'PATCH'
       });
       if (res.ok) {
         setConfirmModal({ ...confirmModal, show: false });
@@ -118,16 +93,10 @@ export default function ApiDashboard() {
 
   const executeRegenerate = async () => {
     const { id } = confirmModal;
-    const token = localStorage.getItem('access_token');
-    if (!token || id === null) return;
-
+    if (id === null) return;
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/client/api/keys/${id}/regenerate`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+      const res = await authorizedFetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/client/api/keys/${id}/regenerate`, {
+        method: 'POST'
       });
       const data = await res.json();
       if (data.new_api_key) {
@@ -159,7 +128,7 @@ export default function ApiDashboard() {
         <h1 className="text-xl font-bold flex items-center gap-2 mb-8">
           <Shield className="text-blue-400" /> API Guard
         </h1>
-        <nav className="flex flex-col gap-4 flex-1">
+        <nav className="flex flex-col gap-4 flex-1 text-left">
           <div className="bg-blue-600 p-3 rounded-lg flex items-center gap-2 cursor-pointer shadow-md">
             <Key size={20} /> API Keys
           </div>
@@ -169,7 +138,7 @@ export default function ApiDashboard() {
         </button>
       </div>
 
-      <div className="flex-1 p-8">
+      <div className="flex-1 p-8 text-left">
         <div className="flex justify-between items-center mb-8">
           <div>
             <h2 className="text-2xl font-bold text-gray-800">API Key Management</h2>
@@ -207,7 +176,7 @@ export default function ApiDashboard() {
                   <tr 
                     key={k.id} 
                     className="hover:bg-gray-50 transition cursor-pointer group"
-                    onClick={() => setViewingDetails(k)} // Open Detail Modal on row click
+                    onClick={() => setViewingDetails(k)}
                   >
                     <td className="px-6 py-4 font-medium text-gray-800">{k.client_name}</td>
                     <td className="px-6 py-4 font-mono text-xs text-gray-500">
@@ -218,13 +187,12 @@ export default function ApiDashboard() {
                         </button>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-4 text-left">
                       <span className={`px-2 py-1 rounded-full text-xs font-semibold ${k.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
                         {k.is_active ? 'Active' : 'Disabled'}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right flex justify-end gap-3" onClick={(e) => e.stopPropagation()}>
-                      {/* Navigate directly to logs icon */}
                       <button
                         onClick={() => router.push(`/dashboard/logs/${k.key}`)}
                         className="p-2 rounded-lg border border-gray-100 hover:bg-blue-50 text-blue-600 transition"
@@ -257,10 +225,9 @@ export default function ApiDashboard() {
         </div>
       </div>
 
-      {/* --- NEW DETAIL MODAL --- */}
       {viewingDetails && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center backdrop-blur-sm z-[60]">
-          <div className="bg-white p-8 rounded-2xl shadow-2xl w-96 animate-in fade-in zoom-in duration-200">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center backdrop-blur-sm z-50">
+          <div className="bg-white p-8 rounded-2xl shadow-2xl w-96 animate-in fade-in zoom-in duration-200 text-left">
             <div className="flex justify-between items-center mb-6">
                <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center">
                  <Eye size={24} />
@@ -269,14 +236,11 @@ export default function ApiDashboard() {
                  <X size={24} />
                </button>
             </div>
-            
             <h3 className="text-xl font-bold mb-1">Key Details</h3>
             <p className="text-gray-500 text-sm mb-6">Client: <span className="font-semibold text-gray-800">{viewingDetails.client_name}</span></p>
-            
             <div className="bg-gray-50 p-4 rounded-xl border border-gray-200 mb-8 font-mono text-xs text-blue-600 break-all">
               {viewingDetails.key}
             </div>
-
             <button 
               onClick={() => router.push(`/dashboard/logs/${viewingDetails.key}`)}
               className="w-full py-3 bg-blue-600 text-white rounded-xl font-bold shadow-lg hover:bg-blue-700 transition flex items-center justify-center gap-2 group"
@@ -287,10 +251,9 @@ export default function ApiDashboard() {
         </div>
       )}
 
-      {/* Your existing showCreateModal and confirmModal remain unchanged below */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center backdrop-blur-sm z-50">
-          <div className="bg-white p-8 rounded-2xl shadow-2xl w-96 animate-in fade-in zoom-in duration-200">
+          <div className="bg-white p-8 rounded-2xl shadow-2xl w-96 animate-in fade-in zoom-in duration-200 text-left">
             <h3 className="text-xl font-bold mb-4">Create New API Key</h3>
             <label className="block text-sm font-medium text-gray-700 mb-2">Client Name</label>
             <input
@@ -310,7 +273,7 @@ export default function ApiDashboard() {
 
       {confirmModal.show && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center backdrop-blur-sm z-50">
-          <div className="bg-white p-8 rounded-2xl shadow-2xl w-[450px] relative animate-in fade-in zoom-in duration-200">
+          <div className="bg-white p-8 rounded-2xl shadow-2xl w-112.5 relative animate-in fade-in zoom-in duration-200 text-left">
             {!confirmModal.newKey && (
               <button 
                 onClick={() => setConfirmModal({ ...confirmModal, show: false })}
@@ -326,7 +289,7 @@ export default function ApiDashboard() {
                   <CheckCircle size={32} />
                 </div>
                 <h3 className="text-xl font-bold mb-2">Key Regenerated!</h3>
-                <p className="text-gray-500 mb-6 text-sm">Please copy your new key now. You won't be able to see it again.</p>
+                <p className="text-gray-500 mb-6 text-sm text-center">Please copy your new key now.</p>
                 <div className="bg-gray-50 border border-dashed border-gray-300 p-4 rounded-lg flex items-center justify-between mb-6">
                   <code className="text-blue-600 font-bold break-all">{confirmModal.newKey}</code>
                   <button onClick={() => copyToClipboard(confirmModal.newKey!)} className="ml-4 p-2 text-gray-500 hover:text-blue-600">
@@ -350,7 +313,7 @@ export default function ApiDashboard() {
                 </h3>
                 <p className="text-gray-500 mb-6 text-sm">
                   {confirmModal.type === 'regenerate' 
-                    ? `Are you sure you want to regenerate the key for "${confirmModal.clientName}"? The current key will stop working immediately.`
+                    ? `Are you sure you want to regenerate the key for "${confirmModal.clientName}"?`
                     : `Are you sure you want to ${confirmModal.active ? 'disable' : 'enable'} access for "${confirmModal.clientName}"?`
                   }
                 </p>

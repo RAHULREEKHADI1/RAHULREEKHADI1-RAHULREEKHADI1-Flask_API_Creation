@@ -35,7 +35,6 @@ def get_logs():
         if status_code:
             query = query.filter(APIRequestLog.status_code == status_code)
         
-        # 3. Date Filtering
         if start_date:
             try:
                 query = query.filter(APIRequestLog.timestamp >= datetime.fromisoformat(start_date))
@@ -48,14 +47,12 @@ def get_logs():
             except (ValueError, TypeError):
                 pass
 
-        # 4. Pagination (Sort by newest first)
         paginated_logs = query.order_by(APIRequestLog.timestamp.desc()).paginate(
             page=page, 
             per_page=limit, 
             error_out=False
         )
 
-        # 5. Format Result with exact keys the Frontend expects
         result = [
             {
                 "timestamp": log.timestamp.isoformat() if log.timestamp else None,
@@ -77,5 +74,5 @@ def get_logs():
         }), 200
 
     except Exception as e:
-        print(f"Log Fetch Error: {str(e)}") # Log this to your terminal
+        print(f"Log Fetch Error: {str(e)}")
         return jsonify({"success": False, "error": "Internal server error"}), 500
