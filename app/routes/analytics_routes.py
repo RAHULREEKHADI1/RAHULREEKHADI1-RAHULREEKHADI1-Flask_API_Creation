@@ -59,6 +59,11 @@ def get_base_query():
     
     if not current_user_id:
         return None
+    
+    try:
+        current_user_id = int(current_user_id)
+    except (ValueError, TypeError):
+        return None
 
     user = User.query.get(current_user_id)
     target_user_id = request.args.get("user_id", type=int)
