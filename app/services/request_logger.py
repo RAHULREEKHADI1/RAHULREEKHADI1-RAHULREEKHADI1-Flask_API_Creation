@@ -8,7 +8,7 @@ def start_timer():
 def log_request(response):
     if request.path.startswith('/logs') or request.method == 'OPTIONS':
         return response
-    found_user_id = None
+
     try:
         end = datetime.utcnow()
         duration = (end - g.start).total_seconds() * 1000 if hasattr(g, 'start') else 0
@@ -19,8 +19,6 @@ def log_request(response):
             if auth_header and auth_header.startswith("Api-Key "):
                 api_key = auth_header.split(" ")[1]
         
-        if found_user_id is None:
-            return response
 
         from app.models.api_request_log import APIRequestLog
         from app.models.api_key import APIKey
@@ -38,6 +36,9 @@ def log_request(response):
             key_record = APIKey.query.filter_by(key=api_key).first()
             if key_record:
                 found_user_id = key_record.user_id
+        
+        if found_user_id is None:
+            return response
 
         log = APIRequestLog(
             endpoint=request.path,
