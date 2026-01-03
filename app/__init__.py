@@ -67,8 +67,8 @@ def create_app(test_config=None):
     from .routes.analytics_routes import analytics_api
     app.register_blueprint(analytics_api)
 
-    with app.app_context():
-        db.create_all()
+    # with app.app_context():
+    #     db.create_all()
 
     return app
 
