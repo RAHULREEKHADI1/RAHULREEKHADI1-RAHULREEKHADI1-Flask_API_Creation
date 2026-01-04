@@ -141,28 +141,28 @@ export default function AdminUserLogsPage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
-                <div className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm flex items-center gap-5">
+                <div className="bg-white p-6 rounded-4xl border border-gray-100 shadow-sm flex items-center gap-5">
                     <div className="bg-indigo-50 p-4 rounded-2xl text-indigo-600"><Activity size={24} /></div>
                     <div>
                         <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Total Entries</p>
                         <p className="text-2xl font-black">{metadata.total_logs.toLocaleString()}</p>
                     </div>
                 </div>
-                <div className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm flex items-center gap-5">
+                <div className="bg-white p-6 rounded-4xl border border-gray-100 shadow-sm flex items-center gap-5">
                     <div className="bg-blue-50 p-4 rounded-2xl text-blue-600"><Zap size={24} /></div>
                     <div>
                         <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Avg Latency</p>
                         <p className="text-2xl font-black">{avgResponse}<span className="text-xs font-bold text-gray-400 ml-1">ms</span></p>
                     </div>
                 </div>
-                <div className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm flex items-center gap-5">
+                <div className="bg-white p-6 rounded-4xl border border-gray-100 shadow-sm flex items-center gap-5">
                     <div className="bg-rose-50 p-4 rounded-2xl text-rose-600"><AlertTriangle size={24} /></div>
                     <div>
                         <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Error Rate</p>
                         <p className="text-2xl font-black">{analytics.errorRate.toFixed(3)}<span className="text-xs font-bold text-gray-400 ml-1">%</span></p>
                     </div>
                 </div>
-                <div className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm flex items-center gap-5">
+                <div className="bg-white p-6 rounded-4xl border border-gray-100 shadow-sm flex items-center gap-5">
                     <div className="bg-amber-50 p-4 rounded-2xl text-amber-600"><Globe size={24} /></div>
                     <div className="overflow-hidden">
                         <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Primary Route</p>
@@ -207,7 +207,7 @@ export default function AdminUserLogsPage() {
                 </table>
             </div>
 
-            <div className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm mb-10 flex flex-wrap gap-8 items-end">
+            <div className="bg-white p-6 rounded-4xl border border-gray-100 shadow-sm mb-10 flex flex-wrap gap-8 items-end">
                 <div className="flex flex-col gap-2.5">
                     <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 flex items-center gap-2"><Filter size={12} /> Response Status</label>
                     <select name="status" value={filters.status} onChange={handleFilterChange} className="bg-gray-50 border border-gray-100 rounded-2xl px-5 py-3 text-sm font-bold focus:ring-4 focus:ring-indigo-500/5 transition outline-none">
