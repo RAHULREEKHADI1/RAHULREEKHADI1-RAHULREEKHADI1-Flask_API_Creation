@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import { ChevronLeft, Shield, Key, BarChart3,Loader2, Activity, Zap, ChevronRight, AlertCircle, LogOut, Filter, Calendar, AlertTriangle, Globe, RefreshCcw, X } from 'lucide-react';
+import { ChevronLeft, Shield, Key, BarChart3, Loader2, Activity, Zap, ChevronRight, AlertCircle, LogOut, Filter, Calendar, AlertTriangle, Globe, RefreshCcw, X, CheckCircle, Terminal, Copy, Play } from 'lucide-react';
 import { authorizedFetch } from '@/utils/api';
 
 interface LogEntry {
@@ -23,6 +23,49 @@ export default function RequestLogsPage() {
     const [metadata, setMetadata] = useState({ total_logs: 0, total_pages: 1, page: 1 });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+
+    const [apiResponse, setApiResponse] = useState<{ status: number, data: any } | null>(null);
+    const [isTesting, setIsTesting] = useState(false);
+    const [copied, setCopied] = useState(false);
+
+    const copyKey = () => {
+        const apiKey = params.key as string;
+        if (!apiKey) return;
+        navigator.clipboard.writeText(apiKey);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    };
+
+    const testApiCall = async () => {
+        const apiKey = params.key as string;
+        if (!apiKey) return;
+
+        setIsTesting(true);
+        try {
+            console.log(apiKey);
+
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/data`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Api-Key ${apiKey}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            const data = await res.json();
+            console.log(data);
+            if (res.status === 200) {
+                window.location.reload();
+            }
+
+            setApiResponse({ status: res.status, data });
+        } catch (error) {
+            console.log(error);
+
+            setApiResponse({ status: 500, data: { msg: "Connection failed to Flask backend" } });
+        } finally {
+            setIsTesting(false);
+        }
+    };
 
     const [analytics, setAnalytics] = useState({
         errorRate: 0,
@@ -64,7 +107,7 @@ export default function RequestLogsPage() {
         try {
             setLoading(true);
             setError(null);
-            
+
             const apiKey = params.key;
             const userId = searchParams.get('user_id');
 
@@ -117,33 +160,99 @@ export default function RequestLogsPage() {
 
     return (
         <div className="min-h-screen bg-slate-50 font-sans antialiased text-slate-900 flex">
-            {/* Sidebar - Matching the previous dashboard */}
-            <aside className="w-72 bg-slate-950 text-white p-8 flex flex-col border-r border-slate-800 shrink-0 sticky top-0 h-screen">
-                <div className="flex items-center gap-3 mb-12 px-2">
+
+            <aside className="w-80 bg-slate-950 text-white p-6 flex flex-col border-r border-slate-800 shrink-0 sticky top-0 h-screen">
+                {/* Brand Header */}
+                <div className="flex items-center gap-3 mb-10 px-2 shrink-0">
                     <div className="p-2 bg-indigo-500 rounded-lg shadow-lg shadow-indigo-500/20">
-                        <Shield size={24} className="text-white" />
+                        <Shield size={22} className="text-white" />
                     </div>
-                    <h1 className="text-xl font-bold tracking-tight">API Guard</h1>
+                    <h1 className="text-lg font-bold tracking-tight">API Guard</h1>
                 </div>
-                
-                <nav className="flex flex-col gap-2 flex-1">
-                    <button onClick={() => router.push('/dashboard')} className="flex items-center gap-3 text-slate-400 p-3.5 rounded-xl font-medium hover:bg-slate-900 transition-all hover:text-white group">
-                        <Key size={18} className="group-hover:text-indigo-400 transition-colors" /> API Management
-                    </button>
-                    <div className="flex items-center gap-3 bg-indigo-600/10 text-indigo-400 p-3.5 rounded-xl font-semibold border border-indigo-500/20 shadow-sm cursor-default">
-                        <BarChart3 size={18} /> Request Logs
+
+                {/* Scrollable Body: Navigation + Sandbox */}
+                <div className="flex-1 overflow-y-auto space-y-8 pr-2 custom-scrollbar">
+                    <nav className="flex flex-col gap-1.5">
+                        <button
+                            onClick={() => router.push('/dashboard')}
+                            className="flex items-center gap-3 text-slate-400 p-3 rounded-xl text-sm font-medium hover:bg-slate-900 transition-all hover:text-white group"
+                        >
+                            <Key size={18} className="group-hover:text-indigo-400 transition-colors" />
+                            API Management
+                        </button>
+                        <div className="flex items-center gap-3 bg-indigo-600/10 text-indigo-400 p-3 rounded-xl text-sm font-semibold border border-indigo-500/20 shadow-sm cursor-default">
+                            <BarChart3 size={18} />
+                            Request Logs
+                        </div>
+                    </nav>
+
+                    {/* API Sandbox (Reverted to Stone Theme) */}
+                    <div className="bg-stone-50 rounded-3xl p-5 border border-stone-200 shadow-xl">
+                        <div className="flex items-center justify-between mb-5 px-1">
+                            <div className="flex items-center gap-2">
+                                <Terminal size={14} className="text-stone-600" />
+                                <span className="text-[10px] font-black uppercase tracking-widest text-stone-400">API Sandbox</span>
+                            </div>
+                            <div className="flex gap-1">
+                                <div className="w-1 h-1 rounded-full bg-stone-300" />
+                                <div className="w-1 h-1 rounded-full bg-stone-300" />
+                            </div>
+                        </div>
+
+                        <div className="space-y-4">
+                            <div className="group relative bg-white p-3.5 rounded-2xl border border-stone-200 transition-all hover:border-amber-500/50 shadow-sm">
+                                <p className="text-[9px] font-black text-stone-400 uppercase mb-1.5 flex justify-between items-center">
+                                    Active Key
+                                    <button onClick={copyKey} className="text-stone-400 hover:text-stone-600">
+                                        {copied ? <CheckCircle size={10} className="text-emerald-600" /> : <Copy size={10} />}
+                                    </button>
+                                </p>
+                                <p className="text-[11px] font-mono text-stone-700 truncate tracking-tight">
+                                    {params.key || 'no_key_detected'}
+                                </p>
+                            </div>
+
+                            <div className="bg-stone-100/50 p-3 rounded-xl border border-stone-200/60">
+                                <p className="text-[9px] font-black text-stone-400 uppercase mb-1">Route</p>
+                                <p className="text-[10px] font-mono text-stone-600">GET /api/data</p>
+                            </div>
+
+                            <button
+                                onClick={testApiCall}
+                                disabled={isTesting}
+                                className="w-full bg-stone-900 hover:bg-stone-800 disabled:opacity-50 text-white font-black py-3.5 rounded-2xl flex items-center justify-center gap-2 text-xs transition-all active:scale-95 shadow-lg shadow-stone-200"
+                            >
+                                {isTesting ? <Loader2 className="animate-spin" size={16} /> : <><Play size={14} fill="currentColor" /> Execute Test</>}
+                            </button>
+
+                            {apiResponse && (
+                                <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+                                    <div className="flex items-center justify-between mb-2 px-1">
+                                        <span className="text-[9px] font-bold text-stone-500 uppercase">Response</span>
+                                        <span className={`text-[9px] font-black px-2 py-0.5 rounded-md ${apiResponse.status === 200 ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
+                                            {apiResponse.status}
+                                        </span>
+                                    </div>
+                                    <pre className="p-4 bg-white rounded-2xl text-[10px] font-mono text-stone-600 max-h-40 overflow-y-auto border border-stone-200 custom-scrollbar shadow-inner">
+                                        {JSON.stringify(apiResponse.data, null, 2)}
+                                    </pre>
+                                </div>
+                            )}
+                        </div>
                     </div>
-                </nav>
+                </div>
 
-                <button 
-                    onClick={handleLogout} 
-                    className="group flex items-center gap-3 p-4 text-slate-500 hover:text-red-400 transition-all border-t border-slate-900 mt-8 hover:bg-red-500/5 rounded-xl"
-                >
-                    <LogOut size={18} className="group-hover:-translate-x-1 transition-transform" /> 
-                    <span className="font-semibold text-sm">Sign Out</span>
-                </button>
+                {/* Fixed Bottom Sign Out */}
+                <div className="pt-6 mt-4 border-t border-slate-900 shrink-0">
+                    <button
+                        onClick={handleLogout}
+                        className="group flex items-center gap-3 w-full p-3 text-slate-500 hover:text-red-400 transition-all hover:bg-red-500/5 rounded-xl"
+                    >
+                        <LogOut size={18} className="group-hover:-translate-x-1 transition-transform" />
+                        <span className="font-semibold text-sm">Sign Out</span>
+                    </button>
+                </div>
             </aside>
-
             {/* Main Content */}
             <main className="flex-1 overflow-y-auto">
                 <div className="max-w-6xl mx-auto p-12">
@@ -180,10 +289,10 @@ export default function RequestLogsPage() {
                         {[
                             { label: 'Ingested Logs', value: metadata.total_logs.toLocaleString(), icon: Activity, color: 'text-emerald-600', bg: 'bg-emerald-50' },
                             { label: 'Avg Latency', value: `${avgResponse}ms`, icon: Zap, color: 'text-indigo-600', bg: 'bg-indigo-50' },
-                            { label: 'Error Rate', value: `${analytics.errorRate}%`, icon: AlertTriangle, color: 'text-red-600', bg: 'bg-red-50' },
+                            { label: 'Error Rate', value: `${Number(analytics.errorRate).toFixed(3)}%`, icon: AlertTriangle, color: 'text-red-600', bg: 'bg-red-50' },
                             { label: 'Primary Route', value: analytics.topEndpoint, icon: Globe, color: 'text-amber-600', bg: 'bg-amber-50', truncate: true },
                         ].map((stat, idx) => (
-                            <div key={idx} className="bg-white p-6 rounded-[2rem] border border-slate-200/60 shadow-sm">
+                            <div key={idx} className="bg-white p-6 rounded-4xl border border-slate-200/60 shadow-sm">
                                 <div className={`${stat.bg} ${stat.color} w-10 h-10 rounded-xl flex items-center justify-center mb-4`}>
                                     <stat.icon size={20} />
                                 </div>
@@ -194,12 +303,12 @@ export default function RequestLogsPage() {
                     </div>
 
                     {/* Filter Utilities */}
-                    <div className="bg-white p-6 rounded-[2rem] border border-slate-200/60 shadow-sm mb-8 flex flex-wrap gap-6 items-end">
-                        <div className="flex-1 min-w-[180px] space-y-2">
+                    <div className="bg-white p-6 rounded-4xl border border-slate-200/60 shadow-sm mb-8 flex flex-wrap gap-6 items-end">
+                        <div className="flex-1 min-w-45 space-y-2">
                             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-1.5">
                                 <Filter size={12} strokeWidth={3} /> Status Filter
                             </label>
-                            <select 
+                            <select
                                 value={statusFilter}
                                 onChange={(e) => setStatusFilter(e.target.value)}
                                 className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 focus:border-indigo-500 outline-none transition"
@@ -213,31 +322,31 @@ export default function RequestLogsPage() {
                             </select>
                         </div>
 
-                        <div className="flex-1 min-w-[180px] space-y-2">
+                        <div className="flex-1 min-w-45 space-y-2">
                             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-1.5">
                                 <Calendar size={12} strokeWidth={3} /> Start Range
                             </label>
-                            <input 
-                                type="date" 
+                            <input
+                                type="date"
                                 value={startDate}
                                 onChange={(e) => setStartDate(e.target.value)}
                                 className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 focus:border-indigo-500 outline-none transition"
                             />
                         </div>
 
-                        <div className="flex-1 min-w-[180px] space-y-2">
+                        <div className="flex-1 min-w-45 space-y-2">
                             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-1.5">
                                 <Calendar size={12} strokeWidth={3} /> End Range
                             </label>
-                            <input 
-                                type="date" 
+                            <input
+                                type="date"
                                 value={endDate}
                                 onChange={(e) => setEndDate(e.target.value)}
                                 className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 focus:border-indigo-500 outline-none transition"
                             />
                         </div>
 
-                        <button 
+                        <button
                             onClick={() => { setStatusFilter(''); setStartDate(''); setEndDate(''); }}
                             className="px-6 py-3.5 text-slate-400 hover:text-indigo-600 text-[10px] font-black uppercase tracking-widest transition-colors"
                         >
@@ -246,7 +355,7 @@ export default function RequestLogsPage() {
                     </div>
 
                     {/* Data Table */}
-                    <div className="bg-white rounded-[2rem] border border-slate-200/60 shadow-sm overflow-hidden">
+                    <div className="bg-white rounded-4xl border border-slate-200/60 shadow-sm overflow-hidden">
                         <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-white">
                             <div className="flex items-center gap-3">
                                 <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
@@ -273,7 +382,7 @@ export default function RequestLogsPage() {
                                         <ChevronRight size={18} strokeWidth={3} />
                                     </button>
                                 </div>
-                                <button 
+                                <button
                                     onClick={() => fetchLogs(1)}
                                     className="p-2.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all"
                                 >
@@ -313,9 +422,8 @@ export default function RequestLogsPage() {
                                         logs.map((log, index) => (
                                             <tr key={index} className="text-sm hover:bg-slate-50/50 transition-colors group">
                                                 <td className="px-8 py-6">
-                                                    <span className={`px-3 py-1.5 rounded-lg text-[10px] font-black tracking-wider ${
-                                                        log.method === 'GET' ? 'bg-indigo-50 text-indigo-700 border border-indigo-100' : 'bg-emerald-50 text-emerald-700 border border-emerald-100'
-                                                    }`}>
+                                                    <span className={`px-3 py-1.5 rounded-lg text-[10px] font-black tracking-wider ${log.method === 'GET' ? 'bg-indigo-50 text-indigo-700 border border-indigo-100' : 'bg-emerald-50 text-emerald-700 border border-emerald-100'
+                                                        }`}>
                                                         {log.method}
                                                     </span>
                                                 </td>
