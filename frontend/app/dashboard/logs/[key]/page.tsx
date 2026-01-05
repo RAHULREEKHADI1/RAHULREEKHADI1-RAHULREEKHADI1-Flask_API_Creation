@@ -53,11 +53,11 @@ export default function RequestLogsPage() {
             });
             const data = await res.json();
             console.log(data);
-            if (res.status === 200) {
-                window.location.reload();
-            }
 
             setApiResponse({ status: res.status, data });
+            fetchLogs(1);
+            fetchAnalytics();
+            
         } catch (error) {
             console.log(error);
 
@@ -162,7 +162,7 @@ export default function RequestLogsPage() {
         <div className="min-h-screen bg-slate-50 font-sans antialiased text-slate-900 flex">
 
             <aside className="w-80 bg-slate-950 text-white p-6 flex flex-col border-r border-slate-800 shrink-0 sticky top-0 h-screen">
-                {/* Brand Header */}
+
                 <div className="flex items-center gap-3 mb-10 px-2 shrink-0">
                     <div className="p-2 bg-indigo-500 rounded-lg shadow-lg shadow-indigo-500/20">
                         <Shield size={22} className="text-white" />
@@ -170,7 +170,6 @@ export default function RequestLogsPage() {
                     <h1 className="text-lg font-bold tracking-tight">API Guard</h1>
                 </div>
 
-                {/* Scrollable Body: Navigation + Sandbox */}
                 <div className="flex-1 overflow-y-auto space-y-8 pr-2 custom-scrollbar">
                     <nav className="flex flex-col gap-1.5">
                         <button
@@ -186,7 +185,6 @@ export default function RequestLogsPage() {
                         </div>
                     </nav>
 
-                    {/* API Sandbox (Reverted to Stone Theme) */}
                     <div className="bg-stone-50 rounded-3xl p-5 border border-stone-200 shadow-xl">
                         <div className="flex items-center justify-between mb-5 px-1">
                             <div className="flex items-center gap-2">
@@ -242,7 +240,6 @@ export default function RequestLogsPage() {
                     </div>
                 </div>
 
-                {/* Fixed Bottom Sign Out */}
                 <div className="pt-6 mt-4 border-t border-slate-900 shrink-0">
                     <button
                         onClick={handleLogout}
@@ -253,10 +250,10 @@ export default function RequestLogsPage() {
                     </button>
                 </div>
             </aside>
-            {/* Main Content */}
+
             <main className="flex-1 overflow-y-auto">
                 <div className="max-w-6xl mx-auto p-12">
-                    {/* Top Navigation */}
+
                     <div className="flex justify-between items-center mb-10">
                         <button
                             onClick={() => router.back()}
@@ -284,7 +281,6 @@ export default function RequestLogsPage() {
                         </div>
                     )}
 
-                    {/* Performance Cards */}
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
                         {[
                             { label: 'Ingested Logs', value: metadata.total_logs.toLocaleString(), icon: Activity, color: 'text-emerald-600', bg: 'bg-emerald-50' },
@@ -302,7 +298,6 @@ export default function RequestLogsPage() {
                         ))}
                     </div>
 
-                    {/* Filter Utilities */}
                     <div className="bg-white p-6 rounded-4xl border border-slate-200/60 shadow-sm mb-8 flex flex-wrap gap-6 items-end">
                         <div className="flex-1 min-w-45 space-y-2">
                             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-1.5">
@@ -354,7 +349,6 @@ export default function RequestLogsPage() {
                         </button>
                     </div>
 
-                    {/* Data Table */}
                     <div className="bg-white rounded-4xl border border-slate-200/60 shadow-sm overflow-hidden">
                         <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-white">
                             <div className="flex items-center gap-3">
